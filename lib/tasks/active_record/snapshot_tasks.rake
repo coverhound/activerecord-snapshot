@@ -1,0 +1,54 @@
+require "active_snapshot/actions/create"
+require "active_snapshot/actions/import"
+
+namespace :db do
+  namespace :snapshot do
+    desc "Create snapshot"
+    task :create do
+      ActiveRecord::Snapshot::Create.call
+    end
+
+    namespace :import do
+      desc "Import only specific tables from the most recent snapshot"
+      task :only, [:tables] => :environment do |_t, args|
+        abort "Do not run in production mode!" if Rails.env.production?
+
+        if args[:tables].blank?
+          abort "Usage: bundle exec rake db:snapshot:import:only['table1 table2']"
+        end
+
+        tables = args[:tables].split(/[, ;]+/)
+        ActiveRecord::Snapshot::Import.call(tables: tables)
+      end
+    end
+
+    desc "Import production database snapshot."
+    task :import, [:version] => [:environment] do |_t, args|
+      abort "Do not run in prodution mode!" if Rails.env.production?
+      ActiveRecord::Snapshot::Import.call(version: args[:version].strip)
+    end
+
+    namespace :custom do
+      desc "Take a snapshot of the current database and store it in S3"
+      task create: :environment do
+        raise "Do not run in production!" if Rails.env.production?
+        puts <<~TEXT
+          Please enter a unique name for this snapshot. You will need to remember this to access it later:
+        TEXT
+
+        snapshot_name = gets.strip
+
+        abort "Please don't use spaces in your snapshot name." if snapshot_name =~ " "
+        abort "Please ensure your name is a string, integers are used for daily snapshots" if snapshot_name.to_i.to_s == snapshot_name
+
+        ActiveRecord::Snapshot::Create.call(name: snapshot_name)
+      end
+    end
+
+    desc "Create a snapshot of the current database and store it in S3"
+    task create: :environment do
+      raise "Meant for production only!" unless Rails.env.production?
+      ActiveRecord::Snapshot::Create.call
+    end
+  end
+end

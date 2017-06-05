@@ -1,0 +1,17 @@
+store:
+  tmp: "/mnt/tmp"
+  local: <%= Rails.root.join("db/snapshots").to_s %>
+
+s3:
+  access_key_id: 'key'
+  secret_access_key: 'key'
+  bucket: 'bucket'
+  region: 'region'
+  paths:
+    custom_snapshots: 'custom_snapshots'
+    partial_snapshots: 'snapshots'
+
+ssl_key: "/dir/to/snapshots-secret.key"
+
+tables:
+- "example_table"
