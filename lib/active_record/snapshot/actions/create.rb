@@ -8,26 +8,20 @@ module ActiveRecord
       end
 
       def initialize(name: nil)
-        @snapshot = ActiveRecord::Snapshot::Snapshot.new(name)
-        paths = config.s3.paths
-        directory = name ? paths.custom_snapshots : paths.partial_snapshots
-        @s3 = S3.new(directory)
+        @named_snapshot = !name.nil?
+        @snapshot = Snapshot.new(name)
       end
 
       def call
-        steps.each { |step, message| Logger.call(message, method(step)) }
+        Stepper.call(self, **steps)
       end
 
       private
 
-      attr_reader :snapshot, :s3
+      attr_reader :snapshot, :named_snapshot
 
       def config
         ActiveRecord::Snapshot.config
-      end
-
-      def run(message, &block)
-        Logger.call(message, &block)
       end
 
       def steps
@@ -36,8 +30,11 @@ module ActiveRecord
           compress: "Compress snapshot to #{snapshot.compressed}",
           encrypt: "Encrypt snapshot to #{snapshot.encrypted}",
           update_list: "Update list from #{Version.current} to #{Version.next} with #{snapshot.encrypted}",
-          upload_snapshots: "Upload files to #{config.s3.bucket}"
-        }
+          upload_snapshot: "Upload files to #{config.s3.bucket}"
+        }.tap do |s|
+          next if named_snapshot
+          s[:upload_version_info] = "Upload version info to #{config.s3.bucket}"
+        end
       end
 
       def dump
@@ -45,13 +42,13 @@ module ActiveRecord
       end
 
       def compress
-        Pbzip2.compress(snapshot.dump)
+        Bzip2.compress(snapshot.dump)
       end
 
       def encrypt
         OpenSSL.encrypt(
           input: snapshot.compressed,
-          output: snapshot.encrypted,
+          output: snapshot.encrypted
         )
       end
 
@@ -59,10 +56,13 @@ module ActiveRecord
         Version.increment
       end
 
-      def upload_snapshots
-        s3.upload(snapshot.encrypted)
-        s3.upload(Version.path)
-        s3.upload(List.path)
+      def upload_snapshot
+        snapshot.upload
+      end
+
+      def upload_version_info
+        Version.upload
+        List.upload
       end
     end
   end

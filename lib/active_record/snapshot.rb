@@ -1,5 +1,5 @@
 require_relative "snapshot/configuration"
-require_relative "snapshot/utils/logger"
+require_relative "snapshot/utils/stepper"
 require_relative "snapshot/commands/all"
 require_relative "snapshot/files/all"
 require_relative "snapshot/railtie"

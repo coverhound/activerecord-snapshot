@@ -2,6 +2,8 @@ module ActiveRecord
   module Snapshot
     class Snapshot
       def initialize(filename = nil)
+        directory = filename ? paths.named_snapshots : paths.snapshots
+        @s3 = S3.new(directory: directory)
         @filename = clean(filename) || dump_file
       end
 
@@ -17,20 +19,34 @@ module ActiveRecord
         compressed + ".enc"
       end
 
+      def upload
+        s3.upload(encrypted)
+      end
+
+      def download
+        s3.download_to(encrypted)
+      end
+
       private
 
+      attr_reader :s3
+
+      def paths
+        ActiveRecord::Snapshot.config.s3.paths
+      end
+
       def clean(filename)
-        filename.sub(/(\.sql)?(\.bz2)?(\.enc)?$/, ".sql")
+        filename&.sub(/(\.sql)?(\.bz2)?(\.enc)?$/, ".sql")
       end
 
       def dump_file
-        ActiveRecord::Snapshot.config.storage.local.join(
+        ActiveRecord::Snapshot.config.store.local.join(
           "snapshot_#{timestamp}.sql"
-        ).to_s
+        )
       end
 
       def timestamp
-        Time.new.strftime("%Y-%m-%d_%H-%M-%S")
+        Time.zone.now.strftime("%Y-%m-%d_%H-%M-%S")
       end
     end
   end

@@ -2,7 +2,7 @@ module ActiveRecord
   module Snapshot
     class Logger
       def self.call(*args, &block)
-        new(*args, &block).call
+        new(*args).call(&block)
       end
 
       def initialize(step)
@@ -11,11 +11,13 @@ module ActiveRecord
 
       def call
         start
-        yield ? finish : failed
+        yield.tap do |success|
+          success ? finish : failed
+        end
       end
 
       def start
-        puts "== Running: #{step}"
+        puts "== Running: #{@step}"
       end
 
       def finish
@@ -23,7 +25,7 @@ module ActiveRecord
       end
 
       def failed
-        abort "== Failed: #{step}"
+        $stderr.puts "== Failed: #{@step}"
       end
     end
   end

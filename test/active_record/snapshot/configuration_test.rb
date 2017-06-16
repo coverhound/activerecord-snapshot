@@ -35,7 +35,7 @@ module ActiveRecord::Snapshot
     describe "#store" do
       it "responds to the appropriate methods" do
         {
-          tmp: Pathname.new("/mnt/tmp"),
+          tmp: Rails.root.join("tmp/snapshots"),
           local: Rails.root.join("db/snapshots")
         }.each do |name, value|
           assert_equal value, subject.store.public_send(name)

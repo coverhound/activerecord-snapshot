@@ -11,7 +11,7 @@ module ActiveRecord
       end
 
       def call
-        tables.each(&method(:extract_tables))
+        tables.each(&method(:extract_table))
         unify_tables
       end
 
@@ -20,7 +20,7 @@ module ActiveRecord
       attr_reader :tables, :sql_dump
 
       def table_file(table)
-        "db/#{table}.sql"
+        ActiveRecord::Snapshot.config.store.tmp.join("#{table}.sql").to_s
       end
 
       def extract_table(table)

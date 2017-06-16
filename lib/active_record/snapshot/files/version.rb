@@ -3,7 +3,7 @@ module ActiveRecord
     class Version
       class << self
         def current
-          @current ||= ::File.read(path).to_i
+          ::File.read(path).to_i
         end
 
         def next
@@ -14,10 +14,22 @@ module ActiveRecord
           File.write(path, self.next)
         end
 
+        def upload
+          S3.new(directory: config.s3.paths.snapshots).upload(path)
+        end
+
+        def filename
+          "snapshot_version".freeze
+        end
+
         def path
-          ActiveRecord::Snapshot.config.storage.local.join(
-            "snapshot_version"
-          ).to_s.freeze
+          config.store.local.join(filename).to_s.freeze
+        end
+
+        private
+
+        def config
+          ActiveRecord::Snapshot.config
         end
       end
     end

@@ -7,7 +7,7 @@ module ActiveRecord
 
       def dump(tables:, output:)
         dump_command("--no-data #{database} > #{output}") &&
-          dump_command("--quick #{database} #{tables} >> #{output}")
+          dump_command("--quick #{database} #{tables.join(" ")} >> #{output}")
       end
 
       def self.import(*args)
@@ -17,17 +17,16 @@ module ActiveRecord
       def import(input:)
         system(<<~SH)
           nice mysql \\
-            --user #{user} \\
+            --user #{username} \\
             --password #{password} \\
             --host #{host} \\
-            #{database}
-            < #{input}
+            #{database} < #{input}
         SH
       end
 
       private
 
-      delegate :user, :password, :host, :database, to: :db_config
+      delegate :username, :password, :host, :database, to: :db_config
 
       def db_config
         ActiveRecord::Snapshot.config.db
@@ -36,7 +35,7 @@ module ActiveRecord
       def dump_command(args = "")
         system(<<~SH)
           nice mysqldump \\
-            --user #{user} \\
+            --user #{username} \\
             --password #{password} \\
             --host #{host} \\
             #{args}

@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/aws'
 
 module ActiveRecord
   module Snapshot
@@ -8,16 +8,16 @@ module ActiveRecord
         @directory = directory
       end
 
-      def upload(file)
-        connection.put_object(config.bucket, aws_key(file), File.open(file))
+      def upload(path)
+        connection.put_object(config.bucket, aws_key(path), File.open(path))
       end
 
-      def download_to(file)
-        File.open(file, "wb") { |f| f.write(read(file)) }
+      def download_to(path)
+        File.open(path, "wb") { |f| f.write(read(path)) }
       end
 
-      def read(file)
-        connect.get_object(config.bucket, aws_key(file)).body
+      def read(path)
+        connection.get_object(config.bucket, aws_key(path)).body
       end
 
       private
@@ -28,8 +28,8 @@ module ActiveRecord
         ActiveRecord::Snapshot.config.s3
       end
 
-      def aws_key(file)
-        File.join(directory, File.basename(file))
+      def aws_key(path)
+        File.join(directory, File.basename(path))
       end
 
       def create_connection

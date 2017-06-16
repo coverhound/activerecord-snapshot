@@ -1,5 +1,5 @@
 store:
-  tmp: "/mnt/tmp"
+  tmp: <%= Rails.root.join("tmp/snapshots").to_s %>
   local: <%= Rails.root.join("db/snapshots").to_s %>
 
 s3:
