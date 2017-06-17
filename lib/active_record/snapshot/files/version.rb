@@ -3,6 +3,7 @@ module ActiveRecord
     class Version
       class << self
         def current
+          return nil unless File.file?(path)
           ::File.read(path).to_i
         end
 
@@ -12,6 +13,11 @@ module ActiveRecord
 
         def increment
           File.write(path, self.next)
+        end
+
+        def write(version)
+          return false unless version.to_i.to_s == version.to_s
+          File.write(path, version)
         end
 
         def upload

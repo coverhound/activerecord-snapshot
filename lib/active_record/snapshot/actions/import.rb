@@ -6,8 +6,9 @@ module ActiveRecord
       end
 
       def initialize(version: nil, tables: [])
-        version = SelectSnapshot.call(version) if partial_snapshot?(version)
-        @snapshot = Snapshot.new(version)
+        @version = version
+        name = named_version? ? version : SelectSnapshot.call(version)
+        @snapshot = Snapshot.new(name)
         @tables = tables
       end
 
@@ -17,30 +18,37 @@ module ActiveRecord
 
       private
 
-      attr_reader :snapshot, :tables
+      attr_reader :snapshot, :tables, :version
 
       def config
         ActiveRecord::Snapshot.config
       end
 
-      def partial_snapshot?(version)
-        version.blank? || version.to_i.to_s == version
+      def named_version?
+        !version.blank? && version.to_i.to_s != version.to_s
+      end
+
+      def version_downloaded?
+        version.to_i == Version.current && File.file?(snapshot.dump)
       end
 
       def steps
-        {
-          download: "Download snapshot to #{snapshot.encrypted}",
-          decrypt: "Decrypt snapshot to #{snapshot.compressed}",
-          decompress: "Decompress snapshot to #{snapshot.dump}",
-        }.tap do |s|
-          if tables.empty?
-            s[:reset_database] = "Reset database"
-          else
-            s[:filter_tables] = "Filter tables"
-          end
-
-          s[:import] = "Importing the snapshot into #{config.db.database}"
+        steps = {}
+        unless version_downloaded?
+          steps[:download] = "Download snapshot to #{snapshot.encrypted}"
+          steps[:decrypt] = "Decrypt snapshot to #{snapshot.compressed}"
+          steps[:decompress] = "Decompress snapshot to #{snapshot.dump}"
         end
+
+        if tables.empty?
+          steps[:reset_database] = "Reset database"
+        else
+          steps[:filter_tables] = "Filter tables"
+        end
+
+        steps[:import] = "Importing the snapshot into #{config.db.database}"
+        steps[:save] = "Caching the new snapshot version"  unless named_version?
+        steps
       end
 
       def download
@@ -70,6 +78,10 @@ module ActiveRecord
       def import
         config.adapter.import(input: snapshot.dump)
         Rake::Task["db:schema:dump"].invoke
+      end
+
+      def save
+        Version.write(version)
       end
     end
   end

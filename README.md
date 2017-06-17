@@ -81,6 +81,17 @@ Can be given arguments for the version:
 Imports _only_ the tables given as arguments (`foo` and `bar` in this example)
 from the latest regular snapshot
 
+##### `db:snapshot:reload`
+
+Reloads the current snapshot
+
+##### `db:snapshot:list`
+
+Shows a list of snapshots
+
+##### `db:snapshot:list:load[n]`
+
+Shows a list of the last `n` snapshots
 
 ## Installation
 Add this line to your application's Gemfile:

@@ -53,6 +53,24 @@ module ActiveRecord::Snapshot
         end
       end
 
+      describe "when the version has been downloaded" do
+        let(:version) { 15 }
+        before do
+          Version.expects(current: version, write: true).once
+          SelectSnapshot.stubs(:call)
+          Rake::Task.stubs(:[]).returns(rake_task)
+          run_steps
+        end
+
+        it "skips the download and extraction" do
+          Snapshot.any_instance.expects(:download).never
+          OpenSSL.expects(:decrypt).never
+          Bzip2.expects(:decompress).never
+
+          Import.call(version: version)
+        end
+      end
+
       describe "given no tables" do
         it "resets the database" do
           run_steps

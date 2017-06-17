@@ -99,5 +99,51 @@ module ActiveRecord::Snapshot
         task.invoke(tables.join(" "))
       end
     end
+
+    describe "db:snapshot:reload" do
+      let(:task) { rake["db:snapshot:reload"] }
+      after { task.reenable }
+
+      it "fails when there is no current version" do
+        ActiveRecord::Snapshot::Version.stubs(:current)
+        assert_raises(SystemExit) { task.invoke }
+      end
+
+      it "reloads the snapshot" do
+        ActiveRecord::Snapshot::Version.stubs(current: "15")
+        Rake::Task.expects(:[]).returns(stub(:invoke))
+        task.invoke
+      end
+    end
+
+    describe "db:snapshot:list" do
+      let(:task) { rake["db:snapshot:list"] }
+      let(:path) { "path" }
+      let(:output) { "output" }
+      before do
+        ActiveRecord::Snapshot::List.stubs(path: path)
+      end
+
+      it "reads the snapshot list" do
+        File.expects(read: output).with(path).once
+        Object.any_instance.expects(:puts).with(output).once
+        task.invoke
+      end
+    end
+
+    describe "db:snapshot:list:last[3]" do
+      let(:task) { rake["db:snapshot:list:last"] }
+      let(:path) { "foo" }
+      let(:output) { %w[one two three] }
+      before do
+        ActiveRecord::Snapshot::List.stubs(path: path)
+      end
+
+      it "reads the snapshot list" do
+        File.expects(:readlines).with(path).returns(output).once
+        Object.any_instance.expects(:puts).with(output[0..2]).once
+        task.invoke(2)
+      end
+    end
   end
 end

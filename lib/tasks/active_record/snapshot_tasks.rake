@@ -42,6 +42,33 @@ namespace :db do
       end
     end
 
+    desc "Reload current snapshot version"
+    task reload: :load do
+      version = ActiveRecord::Snapshot::Version.current
+      abort "No current version found" unless version
+      Rake::Task["db:snapshot:import"].invoke(version)
+    end
+
+    desc "Show available snapshot versions"
+    task list: :load do
+      version = ActiveRecord::Snapshot::Version.current
+      puts "Current snapshot version is #{version}" if version
+      puts File.read(ActiveRecord::Snapshot::List.path)
+    end
+
+    namespace :list do
+      desc "Show last n available snapshot versions"
+      task :last, [:count] => [:load] do |_t, args|
+        version = ActiveRecord::Snapshot::Version.current
+        puts "Current snapshot version is #{version}" if version
+
+        lines = File.readlines(ActiveRecord::Snapshot::List.path)
+        count = [1, args[:count].to_i].max
+
+        puts lines[0..count]
+      end
+    end
+
     task load: :environment do
       FileUtils.mkdir_p(ActiveRecord::Snapshot.config.store.values)
     end
