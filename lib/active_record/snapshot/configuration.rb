@@ -31,6 +31,10 @@ module ActiveRecord
       class DBConfig < Hashie::Dash
         include Hashie::Extensions::Dash::IndifferentAccess
 
+        def initialize(database_hash)
+          super database_hash.slice("database", "username", "password", "host")
+        end
+
         property :database, required: true
         property :username, required: true
         property :password, required: true
@@ -48,7 +52,7 @@ module ActiveRecord
       include Hashie::Extensions::Dash::Coercion
       include Hashie::Extensions::Dash::IndifferentAccess
 
-      property :db, default: ->(_) { ::Rails.application.config.database[Rails.env] }, coerce: DBConfig
+      property :db, default: ->(_) { ::Rails.application.config.database_configuration[Rails.env] }, coerce: DBConfig
       property :s3, required: true, coerce: S3Config
       property :ssl_key, required: true
       property :tables, required: true

@@ -8,12 +8,6 @@ module ActiveRecord::Snapshot
     let(:rake_task) { stub("Rake Task", invoke: true) }
     before do
       Object.any_instance.stubs(:puts)
-      ActiveRecord::Snapshot.config.db = {
-        username: "f",
-        password: "d",
-        host: "s",
-        database: "a"
-      }
     end
 
     describe "::call" do

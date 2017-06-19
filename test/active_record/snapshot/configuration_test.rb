@@ -5,12 +5,20 @@ module ActiveRecord::Snapshot
   class ConfigurationTest < ActiveSupport::TestCase
     extend MiniTest::Spec::DSL
 
-    config = Rails.application.config
-    def config.database
-      {}
-    end
-
     subject { ActiveRecord::Snapshot.config }
+
+    describe "#db" do
+      it "responds to the appropriate methods" do
+        {
+          database: "mainframe",
+          username: "bearnardo",
+          password: "secret",
+          host: "Jon Stewart"
+        }.each do |name, value|
+          assert_equal value, subject.db.public_send(name)
+        end
+      end
+    end
 
     describe "#s3" do
       it "responds to the appropriate methods" do

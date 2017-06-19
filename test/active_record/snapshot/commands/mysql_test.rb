@@ -8,15 +8,6 @@ module ActiveRecord::Snapshot
     let(:tables) { %w[foo bar] }
     let(:file) { "baz" }
 
-    before do
-      ActiveRecord::Snapshot.config.db = {
-        username: "bearnardo",
-        password: "secret",
-        host: "Jon Stewart",
-        database: "mainframe"
-      }
-    end
-
     describe "::dump" do
       it "dumps the schema and the data" do
         Object.any_instance.expects(:system).with(<<~SH).once.returns(true)

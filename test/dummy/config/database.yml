@@ -1,0 +1,14 @@
+defaults: &defaults
+  database: mainframe
+  username: bearnardo
+  password: secret
+  host: Jon Stewart
+
+test:
+  <<: *defaults
+
+development:
+  <<: *defaults
+
+production:
+  <<: *defaults
