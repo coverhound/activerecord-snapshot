@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "railties", ">= 4.1.0", "< 6.0"
   s.add_dependency "fog-aws", "~> 0.0"
-  s.add_dependency "hashie", ">= 1.2"
+  s.add_dependency "hashie", ">= 3.4.3"
 
   s.add_development_dependency "mocha", "1.1"
   s.add_development_dependency "pry", "~> 0.10.3"
