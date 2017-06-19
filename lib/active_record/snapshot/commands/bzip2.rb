@@ -8,7 +8,7 @@ module ActiveRecord
 
       def self.decompress(path)
         return false unless File.file?(path)
-        system("nice bunzip2 #{path}")
+        system("nice bunzip2 -f #{path}")
       end
     end
   end

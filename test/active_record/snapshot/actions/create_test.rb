@@ -21,7 +21,6 @@ module ActiveRecord::Snapshot
           MySQL.expects(dump: true).once
           Bzip2.expects(compress: true).once
           OpenSSL.expects(encrypt: true).once
-          Version.expects(increment: true).once
           Snapshot.any_instance.expects(upload: true).once
 
           Create.call(name: "foo")
@@ -34,6 +33,7 @@ module ActiveRecord::Snapshot
           Bzip2.expects(compress: true).once
           OpenSSL.expects(encrypt: true).once
           Version.expects(increment: true).once
+          List.expects(add: true).once
           Snapshot.any_instance.expects(upload: true).once
           Version.expects(upload: true).once
           List.expects(upload: true).once

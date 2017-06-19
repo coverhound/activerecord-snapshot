@@ -13,7 +13,7 @@ namespace :db do
         Please enter a unique name for this snapshot. You will need to remember this to access it later:
       TEXT
 
-      snapshot_name = gets.strip
+      snapshot_name = STDIN.gets.strip
 
       abort "Please don't use spaces in your snapshot name." if snapshot_name =~ /\s/
       abort "Please ensure your name is a string, integers are used for daily snapshots" if snapshot_name.to_i.to_s == snapshot_name
@@ -37,7 +37,7 @@ namespace :db do
           abort "Usage: bundle exec rake db:snapshot:import:only['table1 table2']"
         end
 
-        tables = args[:tables].split(/[, ;]+/)
+        tables = args[:tables].split(/[, ;'"]+/).reject(&:blank?)
         ActiveRecord::Snapshot::Import.call(tables: tables)
       end
     end
@@ -46,27 +46,20 @@ namespace :db do
     task reload: :load do
       version = ActiveRecord::Snapshot::Version.current
       abort "No current version found" unless version
-      Rake::Task["db:snapshot:import"].invoke(version)
+      Rake::Task["db:snapshot:import"].invoke(version.to_s)
     end
 
     desc "Show available snapshot versions"
-    task list: :load do
+    task :list, [:count] => [:load] do |_t, args|
       version = ActiveRecord::Snapshot::Version.current
       puts "Current snapshot version is #{version}" if version
-      puts File.read(ActiveRecord::Snapshot::List.path)
-    end
 
-    namespace :list do
-      desc "Show last n available snapshot versions"
-      task :last, [:count] => [:load] do |_t, args|
-        version = ActiveRecord::Snapshot::Version.current
-        puts "Current snapshot version is #{version}" if version
+      path = ActiveRecord::Snapshot::List.path
+      File.file?(path) || ActiveRecord::Snapshot::List.download
+      lines = File.readlines(path)
+      count = args.fetch(:count, 11).to_i - 1
 
-        lines = File.readlines(ActiveRecord::Snapshot::List.path)
-        count = [1, args[:count].to_i].max
-
-        puts lines[0..count]
-      end
+      puts lines[0..count]
     end
 
     task load: :environment do

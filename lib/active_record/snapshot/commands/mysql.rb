@@ -18,7 +18,7 @@ module ActiveRecord
         system(<<~SH)
           nice mysql \\
             --user #{username} \\
-            --password #{password} \\
+            #{password ? '--password' : ''} #{password} \\
             --host #{host} \\
             #{database} < #{input}
         SH

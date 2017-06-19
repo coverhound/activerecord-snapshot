@@ -42,18 +42,18 @@ module ActiveRecord::Snapshot
       end
 
       it "doesn't accept names with spaces" do
-        Object.any_instance.expects(gets: "name with spaces").once
+        STDIN.expects(gets: "name with spaces").once
         assert_raises(SystemExit) { task.invoke }
       end
 
       it "doesn't accept pure numbers" do
-        Object.any_instance.expects(gets: "123").once
+        STDIN.expects(gets: "123").once
         assert_raises(SystemExit) { task.invoke }
       end
 
       it "runs the snapshot" do
         name = "custom"
-        Object.any_instance.expects(gets: name).once
+        STDIN.expects(gets: name).once
         ActiveRecord::Snapshot::Create.expects(:call).with(name: name).once
         task.invoke
       end
@@ -118,31 +118,24 @@ module ActiveRecord::Snapshot
 
     describe "db:snapshot:list" do
       let(:task) { rake["db:snapshot:list"] }
-      let(:path) { "path" }
-      let(:output) { "output" }
+      let(:path) { ActiveRecord::Snapshot::List.path }
+      let(:output) { %w[foo] * 15 }
       before do
-        ActiveRecord::Snapshot::List.stubs(path: path)
+        Version.expects(current: 1).once
+        File.stubs(file?: true)
       end
+      after { task.reenable }
 
-      it "reads the snapshot list" do
-        File.expects(read: output).with(path).once
-        Object.any_instance.expects(:puts).with(output).once
+      it "defaults to 10 last entries" do
+        File.expects(:readlines).with(path).returns(output).once
+        Object.any_instance.expects(:puts).with(output[0..10]).once
         task.invoke
       end
-    end
 
-    describe "db:snapshot:list:last[3]" do
-      let(:task) { rake["db:snapshot:list:last"] }
-      let(:path) { "foo" }
-      let(:output) { %w[one two three] }
-      before do
-        ActiveRecord::Snapshot::List.stubs(path: path)
-      end
-
-      it "reads the snapshot list" do
+      it "outputs n last entries" do
         File.expects(:readlines).with(path).returns(output).once
         Object.any_instance.expects(:puts).with(output[0..2]).once
-        task.invoke(2)
+        task.invoke(3)
       end
     end
   end

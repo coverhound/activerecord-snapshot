@@ -37,8 +37,8 @@ module ActiveRecord
 
         property :database, required: true
         property :username, required: true
-        property :password, required: true
         property :host, required: true
+        property :password
       end
 
       class StoreConfig < Hashie::Dash

@@ -8,17 +8,43 @@ module ActiveRecord::Snapshot
     subject { Snapshot.new(filename) }
     let(:filename) { "foo.sql" }
 
+    describe "#named?" do
+      describe "given no filename" do
+        let(:filename) { nil }
+
+        it "is false" do
+          assert_equal false, subject.named?
+        end
+      end
+
+      describe "given a generated filename" do
+        let(:filename) { "snapshot_2012-01-01_00-00-00.sql" }
+
+        it "is false" do
+          assert_equal false, subject.named?
+        end
+      end
+
+      describe "given a custom filename" do
+        let(:filename) { "foobar" }
+
+        it "is true" do
+          assert_equal true, subject.named?
+        end
+      end
+    end
+
     describe "#dump" do
       describe "given a filename" do
         it "uses that filename" do
-          assert_equal filename, subject.dump
+          assert_match filename, subject.dump
         end
 
         describe "when the filename has extensions" do
           let(:filename) { "foo.sql.bz2.enc" }
 
           it "strips extensions that are not sql" do
-            assert_equal "foo.sql", subject.dump
+            assert_match "foo.sql", subject.dump
           end
         end
       end
@@ -40,19 +66,19 @@ module ActiveRecord::Snapshot
 
     describe "#compressed" do
       it "adds the .bz2 extension" do
-        assert_equal filename + ".bz2", subject.compressed
+        assert_match filename + ".bz2", subject.compressed
       end
     end
 
     describe "#encrypted" do
       it "adds the .bz2.enc extension" do
-        assert_equal filename + ".bz2.enc", subject.encrypted
+        assert_match filename + ".bz2.enc", subject.encrypted
       end
     end
 
     describe "#download" do
       it "downloads to the path" do
-        S3.any_instance.expects(:download_to).with(subject.encrypted)
+        S3.any_instance.expects(:download_to).with(includes(subject.encrypted))
         subject.download
       end
     end

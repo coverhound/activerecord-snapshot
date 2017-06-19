@@ -33,8 +33,8 @@ module ActiveRecord
       end
 
       def unify_tables
-        all = tables.map(&method(:table_file)).join(" ")
-        system("cat #{all} > #{sql_dump}")
+        all = tables.map(&method(:table_file))
+        system("cat #{all.join(" ")} > #{sql_dump}") && FileUtils.rm(all)
       end
     end
   end

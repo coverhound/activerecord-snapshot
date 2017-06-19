@@ -21,13 +21,14 @@ module ActiveRecord
         def get(version:)
           File.readlines(path).each do |line|
             version_str, filename = line.split(" ")
-            return filename if version_str.to_i == version.to_i
+            return [version_str.to_i, filename] if version_str.to_i == version.to_i
           end
+          []
         end
 
         def last
           version_str, filename = File.open(path, &:readline).split(" ")
-          { version: version_str.to_i, filename: filename }
+          [version_str.to_i, filename]
         end
 
         def filename

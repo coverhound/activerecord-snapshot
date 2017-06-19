@@ -29,10 +29,10 @@ module ActiveRecord
           dump: "Create dump of #{config.db.database} at #{snapshot.dump}",
           compress: "Compress snapshot to #{snapshot.compressed}",
           encrypt: "Encrypt snapshot to #{snapshot.encrypted}",
-          update_list: "Update list from #{Version.current} to #{Version.next} with #{snapshot.encrypted}",
           upload_snapshot: "Upload files to #{config.s3.bucket}"
         }.tap do |s|
           next if named_snapshot
+          s[:update_list] = "Update list from #{Version.current} to #{Version.next} with #{snapshot.encrypted}"
           s[:upload_version_info] = "Upload version info to #{config.s3.bucket}"
         end
       end
@@ -54,6 +54,7 @@ module ActiveRecord
 
       def update_list
         Version.increment
+        List.add(version: Version.current, file: snapshot.encrypted)
       end
 
       def upload_snapshot

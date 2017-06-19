@@ -87,6 +87,7 @@ module ActiveRecord::Snapshot
       def run_steps
         Snapshot.any_instance.expects(download: true).once
         OpenSSL.expects(decrypt: true).once
+        FileUtils.expects(rm: true).once
         Bzip2.expects(decompress: true).once
         MySQL.expects(import: true).once
         Rake::Task.expects(:[]).with("db:schema:dump").returns(rake_task).once

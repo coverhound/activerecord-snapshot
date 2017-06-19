@@ -40,13 +40,13 @@ module ActiveRecord::Snapshot
 
       describe "::get" do
         it "gets the filename for that version" do
-          assert_equal "bar", List.get(version: 2)
+          assert_equal [2, "bar"], List.get(version: 2)
         end
       end
 
       describe "::last" do
         it "gets the last version & filename" do
-          assert_equal({ version: 3, filename: "baz" }, List.last)
+          assert_equal([3, "baz"], List.last)
         end
       end
     end

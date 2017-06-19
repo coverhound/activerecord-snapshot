@@ -7,7 +7,11 @@ module ActiveRecord
 
       def initialize(version: nil, tables: [])
         @version = version
-        name = named_version? ? version : SelectSnapshot.call(version)
+        if named_version?
+          name = version
+        else
+          @version, name = SelectSnapshot.call(version)
+        end
         @snapshot = Snapshot.new(name)
         @tables = tables
       end
@@ -47,7 +51,7 @@ module ActiveRecord
         end
 
         steps[:import] = "Importing the snapshot into #{config.db.database}"
-        steps[:save] = "Caching the new snapshot version"  unless named_version?
+        steps[:save] = "Caching the new snapshot version" unless named_version? || tables.present?
         steps
       end
 
@@ -59,11 +63,11 @@ module ActiveRecord
         OpenSSL.decrypt(
           input: snapshot.encrypted,
           output: snapshot.compressed
-        )
+        ) && FileUtils.rm(snapshot.encrypted)
       end
 
       def decompress
-        Bzip2.decompress(snapshot.dump)
+        Bzip2.decompress(snapshot.compressed)
       end
 
       def reset_database

@@ -2,9 +2,13 @@ module ActiveRecord
   module Snapshot
     class Snapshot
       def initialize(filename = nil)
-        directory = filename ? paths.named_snapshots : paths.snapshots
-        @s3 = S3.new(directory: directory)
         @filename = clean(filename) || dump_file
+        directory = named? ? paths.named_snapshots : paths.snapshots
+        @s3 = S3.new(directory: directory)
+      end
+
+      def named?
+        /\Asnapshot_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}(\..+)?\z/ !~ File.basename(@filename)
       end
 
       def dump
@@ -36,13 +40,19 @@ module ActiveRecord
       end
 
       def clean(filename)
-        filename&.sub(/(\.sql)?(\.bz2)?(\.enc)?$/, ".sql")
+        return unless filename
+        basename = File.basename(
+          filename.sub(/(\.sql)?(\.bz2)?(\.enc)?$/, ".sql")
+        )
+        local_path.join(basename).to_s
       end
 
       def dump_file
-        ActiveRecord::Snapshot.config.store.local.join(
-          "snapshot_#{timestamp}.sql"
-        )
+        local_path.join("snapshot_#{timestamp}.sql").to_s
+      end
+
+      def local_path
+        ActiveRecord::Snapshot.config.store.local
       end
 
       def timestamp
