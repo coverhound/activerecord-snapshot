@@ -7,6 +7,23 @@ module ActiveRecord::Snapshot
 
     subject { ActiveRecord::Snapshot.config }
 
+    describe "::env" do
+      describe "when the SNAPSHOT_ENV is set" do
+        let(:env) { "foo" }
+        before { ENV.stubs(fetch: env) }
+
+        it "returns the SNAPSHOT_ENV" do
+          assert_equal env, subject.class.env
+        end
+      end
+
+      describe "when SNAPSHOT_ENV is not set" do
+        it "returns the Rails environment" do
+          assert_equal Rails.env, subject.class.env
+        end
+      end
+    end
+
     describe "#db" do
       it "responds to the appropriate methods" do
         {
