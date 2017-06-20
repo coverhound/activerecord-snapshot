@@ -89,9 +89,9 @@ Reloads the current snapshot
 
 Shows a list of snapshots
 
-##### `db:snapshot:list:load[n]`
+Can be given arguments for amount of entries to show:
 
-Shows a list of the last `n` snapshots
+`db:snapshot:list[5]` will show the last 5 snapshots
 
 ## Installation
 Add this line to your application's Gemfile:
