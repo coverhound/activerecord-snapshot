@@ -14,7 +14,18 @@ Mocha::Configuration.prevent(:stubbing_non_existent_method)
 # to be shown.
 Minitest.backtrace_filter = Minitest::BacktraceFilter.new
 
-Rails::TestUnitReporter.executable = 'bin/test'
+if Rails.const_defined?("TestUnitReporter")
+  Rails::TestUnitReporter.executable = 'bin/test'
+end
 
 # Load fixtures from the engine
+unless ActiveSupport::TestCase.respond_to?(:file_fixture_path)
+  class ActiveSupport::TestCase
+    cattr_accessor :file_fixture_path
+
+    def file_fixture(file_path)
+      File.new(File.join(self.class.file_fixture_path, file_path))
+    end
+  end
+end
 ActiveSupport::TestCase.file_fixture_path = File.expand_path("../../test/fixtures/files", __FILE__)
