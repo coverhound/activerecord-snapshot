@@ -47,6 +47,35 @@ tables:
 - "example_table"
 ```
 
+##### Database
+
+Database configuration happens in your normal `config/database.yml`. If you want
+a database configuration that is NOT tied to your Rails environment, you can run
+these tasks with `SNAPSHOT_ENV` set, and that will override where in the
+`config/database.yml` it looks. For example:
+
+
+With this config file:
+
+```yml
+# config/database.yml
+production:
+  username: root
+  password: secret
+
+snapshot:
+  username: readonly
+  password: secret
+```
+
+Running the below:
+
+```
+SNAPSHOT_ENV=snapshot bundle exec rake db:snapshot:create
+```
+
+It will use `readonly` instead of the `root` user.
+
 ### Tasks
 
 ##### `db:snapshot:create`

@@ -52,7 +52,11 @@ module ActiveRecord
       include Hashie::Extensions::Dash::Coercion
       include Hashie::Extensions::Dash::IndifferentAccess
 
-      property :db, default: ->(_) { ::Rails.application.config.database_configuration[Rails.env] }, coerce: DBConfig
+      def self.env
+        ENV.fetch("SNAPSHOT_ENV", Rails.env)
+      end
+
+      property :db, default: ->(_) { ::Rails.application.config.database_configuration[env] }, coerce: DBConfig
       property :s3, required: true, coerce: S3Config
       property :ssl_key, required: true
       property :tables, required: true
