@@ -8,13 +8,16 @@ module ActiveRecord::Snapshot
     describe "::call" do
       subject { FilterTables }
       let(:sql_dump) { Tempfile.new }
+      let(:tempdir) { Dir.mktmpdir }
 
       before do
+        ActiveRecord::Snapshot.config.store.stubs(tmp: Pathname.new(tempdir))
         File.write(sql_dump.path, file_fixture('example_dump.sql').read)
       end
 
       after do
         sql_dump.unlink
+        FileUtils.rm_rf(tempdir)
       end
 
       describe "::call" do
