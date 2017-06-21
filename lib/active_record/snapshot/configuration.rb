@@ -52,8 +52,12 @@ module ActiveRecord
       include Hashie::Extensions::Dash::Coercion
       include Hashie::Extensions::Dash::IndifferentAccess
 
+      def self.env=(env)
+        @env = env
+      end
+
       def self.env
-        ENV.fetch("SNAPSHOT_ENV", Rails.env)
+        @env || ENV.fetch("SNAPSHOT_ENV", Rails.env)
       end
 
       property :db, default: ->(_) { ::Rails.application.config.database_configuration[env] }, coerce: DBConfig
