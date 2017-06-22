@@ -9,18 +9,18 @@ require "hashie"
 
 module ActiveRecord
   module Snapshot
-    class Configuration < Hashie::Dash
-      class S3Paths < Hashie::Dash
-        include Hashie::Extensions::Dash::IndifferentAccess
+    class ConfigClass < Hashie::Dash
+      include Hashie::Extensions::Dash::Coercion
+      include Hashie::Extensions::Dash::IndifferentAccess
+    end
 
+    class Configuration < ConfigClass
+      class S3Paths < ConfigClass
         property :snapshots, required: true
         property :named_snapshots, required: true
       end
 
-      class S3Config < Hashie::Dash
-        include Hashie::Extensions::Dash::Coercion
-        include Hashie::Extensions::Dash::IndifferentAccess
-
+      class S3Config < ConfigClass
         property :access_key_id, required: true
         property :secret_access_key, required: true
         property :bucket, required: true
@@ -28,11 +28,10 @@ module ActiveRecord
         property :paths, required: true, coerce: S3Paths
       end
 
-      class DBConfig < Hashie::Dash
-        include Hashie::Extensions::Dash::IndifferentAccess
-
-        def initialize(database_hash)
-          super database_hash.slice("database", "username", "password", "host")
+      class DBConfig < ConfigClass
+        def initialize(env)
+          database_hash = ::Rails.application.config.database_configuration[env]
+          super(database_hash.slice("database", "username", "password", "host"))
         end
 
         property :database, required: true
@@ -41,38 +40,48 @@ module ActiveRecord
         property :password
       end
 
-      class StoreConfig < Hashie::Dash
-        include Hashie::Extensions::Dash::Coercion
-        include Hashie::Extensions::Dash::IndifferentAccess
-
+      class StoreConfig < ConfigClass
         property :tmp, default: ->(_) { ::Rails.root.join("tmp/snapshots") }, coerce: Pathname
         property :local, default: ->(_) { ::Rails.root.join("db/snapshots") }, coerce: Pathname
       end
 
-      include Hashie::Extensions::Dash::Coercion
-      include Hashie::Extensions::Dash::IndifferentAccess
+      include Singleton
 
-      def self.env
-        ENV.fetch("SNAPSHOT_ENV", Rails.env)
+      def initialize
+        super(read_config_file)
+        @env = ENV.fetch("SNAPSHOT_ENV", Rails.env)
       end
 
-      property :db, default: ->(_) { ::Rails.application.config.database_configuration[env] }, coerce: DBConfig
+      attr_accessor :env
+
       property :s3, required: true, coerce: S3Config
       property :ssl_key, required: true
       property :tables, required: true
       property :store, coerce: StoreConfig
 
+      def db
+        DBConfig.new(env)
+      end
+
       def adapter
         ActiveRecord::Snapshot::MySQL
       end
-    end
 
-    def self.config_file
-      ::Rails.root.join("config", "snapshot.yml")
+      private
+
+      def config_file
+        ::Rails.root.join("config", "snapshot.yml")
+      end
+
+      def read_config_file
+        contents = File.read(config_file)
+        interpolated = ERB.new(contents).result
+        YAML.safe_load(interpolated)
+      end
     end
 
     def self.config
-      @config ||= Configuration.new(YAML.safe_load(ERB.new(::File.read(config_file)).result))
+      Configuration.instance
     end
   end
 end

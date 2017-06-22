@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+RAILS_BIN = File.expand_path("../../test/dummy/bin/rails", __FILE__)
+
+exec RAILS_BIN + " console"
