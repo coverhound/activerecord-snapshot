@@ -1,3 +1,5 @@
+require 'shellwords'
+
 module ActiveRecord
   module Snapshot
     class MySQL
@@ -17,27 +19,46 @@ module ActiveRecord
       def import(input:)
         system(<<~SH)
           nice mysql \\
-            --user #{username} \\
-            #{password ? '--password' : ''} #{password} \\
-            --host #{host} \\
+            --user=#{username} \\
+            #{password_string} \\
+            --host=#{host} \\
             #{database} < #{input}
         SH
       end
 
       private
 
-      delegate :username, :password, :host, :database, to: :db_config
-
       def db_config
         ActiveRecord::Snapshot.config.db
+      end
+
+      def escape(value)
+        Shellwords.escape(value)
+      end
+
+      def username
+        escape(db_config.username)
+      end
+
+      def password_string
+        return if db_config.password.blank?
+        "--password=#{escape(db_config.password)}"
+      end
+
+      def host
+        escape(db_config.host)
+      end
+
+      def database
+        escape(db_config.database)
       end
 
       def dump_command(args = "")
         system(<<~SH)
           nice mysqldump \\
-            --user #{username} \\
-            --password #{password} \\
-            --host #{host} \\
+            --user=#{username} \\
+            #{password_string} \\
+            --host=#{host} \\
             #{args}
         SH
       end
