@@ -27,6 +27,8 @@ module ActiveRecord::Snapshot
 
       it "runs in production" do
         Rails.env.expects(production?: true).once
+        ActiveRecord::Snapshot::Version.expects(:download).once
+        ActiveRecord::Snapshot::List.expects(:download).once
         ActiveRecord::Snapshot::Create.expects(:call).once
         task.invoke
       end

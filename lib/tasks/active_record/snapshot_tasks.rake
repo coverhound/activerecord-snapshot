@@ -3,6 +3,8 @@ namespace :db do
     desc "Create a snapshot of the current database and store it in S3"
     task create: :load do
       abort "Meant for production only!" unless Rails.env.production?
+      ActiveRecord::Snapshot::List.download
+      ActiveRecord::Snapshot::Version.download
       ActiveRecord::Snapshot::Create.call
     end
 
