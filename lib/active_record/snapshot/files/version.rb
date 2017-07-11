@@ -20,8 +20,12 @@ module ActiveRecord
           File.write(path, version)
         end
 
+        def download
+          s3.download_to(path)
+        end
+
         def upload
-          S3.new(directory: config.s3.paths.snapshots).upload(path)
+          s3.upload(path)
         end
 
         def filename
@@ -33,6 +37,10 @@ module ActiveRecord
         end
 
         private
+
+        def s3
+          S3.new(directory: config.s3.paths.snapshots)
+        end
 
         def config
           ActiveRecord::Snapshot.config
