@@ -25,7 +25,7 @@ namespace :db do
 
     desc "Import production database snapshot."
     task :import, [:version] => [:load] do |_t, args|
-      abort "Do not run in prodution mode!" if Rails.env.production?
+      abort "Do not run in production mode!" if Rails.env.production?
       version = args.fetch(:version, "").strip
       ActiveRecord::Snapshot::Import.call(version: version)
     end
