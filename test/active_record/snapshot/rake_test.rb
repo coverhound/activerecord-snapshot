@@ -1,5 +1,6 @@
 require "test_helper"
 require "minitest/spec"
+require "rake"
 
 module ActiveRecord::Snapshot
   class ConfigurationTest < ActiveSupport::TestCase
@@ -131,12 +132,14 @@ module ActiveRecord::Snapshot
       it "defaults to 10 last entries" do
         File.expects(:readlines).with(path).returns(output).once
         Object.any_instance.expects(:puts).with(output[0..10]).once
+        ActiveRecord::Snapshot::List.expects(:download).once
         task.invoke
       end
 
       it "outputs n last entries" do
         File.expects(:readlines).with(path).returns(output).once
         Object.any_instance.expects(:puts).with(output[0..2]).once
+        ActiveRecord::Snapshot::List.expects(:download).once
         task.invoke(3)
       end
     end

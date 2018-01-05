@@ -56,8 +56,9 @@ namespace :db do
       version = ActiveRecord::Snapshot::Version.current
       puts "Current snapshot version is #{version}" if version
 
+      ActiveRecord::Snapshot::List.download
+
       path = ActiveRecord::Snapshot::List.path
-      File.file?(path) || ActiveRecord::Snapshot::List.download
       lines = File.readlines(path)
       count = args.fetch(:count, 11).to_i - 1
 
