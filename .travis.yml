@@ -16,5 +16,9 @@ gemfile:
   - Gemfile
   - gemfiles/Gemfile.rails-4.2-stable
 
+branches:
+  only:
+    master
+
 services:
   - redis-server
