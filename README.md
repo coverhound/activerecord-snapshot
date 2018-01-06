@@ -1,5 +1,7 @@
 # ActiveRecord::Snapshot
 
+[![Build Status](https://api.travis-ci.org/coverhound/activerecord-snapshot.svg?branch=master)](https://travis-ci.org/coverhound/activerecord-snapshot)
+
 This gem provides rake tasks to create and import MySQL snapshots using S3. This
 is pretty specialized for how CoverHound uses snapshots.
 
