@@ -36,8 +36,7 @@ module ActiveRecord
         ::Fog::Storage.new(
           provider: "AWS",
           region: config.region,
-          aws_access_key_id: config.access_key_id,
-          aws_secret_access_key: config.secret_access_key
+          use_iam_profile: true
         )
       end
     end
