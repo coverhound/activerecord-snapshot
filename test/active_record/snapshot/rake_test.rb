@@ -1,5 +1,6 @@
 require "test_helper"
 require "minitest/spec"
+require "rake"
 
 module ActiveRecord::Snapshot
   class ConfigurationTest < ActiveSupport::TestCase
