@@ -52,6 +52,7 @@ module ActiveRecord
 
         steps[:import] = "Importing the snapshot into #{config.db.database}"
         steps[:save] = "Caching the new snapshot version" unless named_version? || tables.present?
+        steps[:set_env] = "Setting database environment to #{Rails.env}"
         steps
       end
 
@@ -82,6 +83,10 @@ module ActiveRecord
       def import
         config.adapter.import(input: snapshot.dump)
         Rake::Task["db:schema:dump"].invoke
+      end
+
+      def set_env
+        Rake::Task["db:environment:set"].invoke
       end
 
       def save
