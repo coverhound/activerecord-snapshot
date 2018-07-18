@@ -2,7 +2,7 @@ language: ruby
 
 rvm:
   - 2.3.3
-  - 2.4.1
+  - 2.5.1
 
 before_install: "rm ${BUNDLE_GEMFILE}.lock"
 
@@ -14,7 +14,6 @@ cache: bundler
 
 gemfile:
   - Gemfile
-  - gemfiles/Gemfile.rails-4.2-stable
 
 branches:
   only:

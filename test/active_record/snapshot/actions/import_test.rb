@@ -91,6 +91,7 @@ module ActiveRecord::Snapshot
         Bzip2.expects(decompress: true).once
         MySQL.expects(import: true).once
         Rake::Task.expects(:[]).with("db:schema:dump").returns(rake_task).once
+        Rake::Task.expects(:[]).with("db:environment:set").returns(rake_task).once
       end
     end
   end
