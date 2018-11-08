@@ -52,7 +52,8 @@ module ActiveRecord
 
         steps[:import] = "Importing the snapshot into #{config.db.database}"
         steps[:save] = "Caching the new snapshot version" unless named_version? || tables.present?
-        steps[:set_env] = "Setting database environment to #{Rails.env}"
+        steps[:set_env] = "Setting database environment to #{Rails.env}" if Rails::VERSION::MAJOR >= 5
+
         steps
       end
 
