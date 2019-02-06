@@ -28,4 +28,20 @@ unless ActiveSupport::TestCase.respond_to?(:file_fixture_path)
     end
   end
 end
+
+if ENV["CIRCLECI"]
+  require "minitest/reporters"
+
+  Minitest::Reporters.use!(
+    [
+      Minitest::Reporters::DefaultReporter.new,
+      # This path should match up, save for the last directory, with the value
+      # in `store_test_results` and `store_artifacts` in .circleci/config.yml
+      Minitest::Reporters::JUnitReporter.new("test_results/minitest"),
+    ],
+    ENV,
+    Minitest.backtrace_filter,
+  )
+end
+
 ActiveSupport::TestCase.file_fixture_path = File.expand_path("../../test/fixtures/files", __FILE__)
