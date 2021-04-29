@@ -8,8 +8,8 @@ module ActiveRecord
       end
 
       def dump(tables:, output:)
-        dump_command("--no-data #{database} > #{output}") &&
-          dump_command("--quick #{database} #{tables.join(" ")} >> #{output}")
+        dump_command("--no-data --set-gtid-purged=OFF #{database} > #{output}") &&
+          dump_command("--quick --set-gtid-purged=OFF #{database} #{tables.join(" ")} >> #{output}")
       end
 
       def self.import(*args)
