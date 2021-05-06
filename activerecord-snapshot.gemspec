@@ -7,8 +7,8 @@ require "active_record/snapshot/version"
 Gem::Specification.new do |s|
   s.name        = "activerecord-snapshot"
   s.version     = ActiveRecord::Snapshot::VERSION
-  s.authors     = ["Bernardo Farah"]
-  s.email       = ["ber@bernardo.me"]
+  s.authors     = ["CoverHound"]
+  s.email       = ["eng-admin@coverhound.com"]
   s.homepage    = "https://github.com/coverhound/active-record-snapshot"
   s.summary     = "Snapshots for ActiveRecord"
   s.description = "Snapshots for ActiveRecord"
@@ -16,12 +16,14 @@ Gem::Specification.new do |s|
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 
-  s.add_dependency "railties", ">= 4.1.0", "< 6.0"
-  s.add_dependency "fog-aws", ">= 0.1.2"
-  s.add_dependency "hashie", ">= 3.4.3"
+  s.add_dependency "activejob", ">= 4.1.0", "< 6.0"
+  s.add_dependency "fog-aws", "~> 0.1"
+  s.add_dependency "hashie", "~> 3.4"
   s.add_dependency "mime-types", ">= 1.16", "< 4"
+  s.add_dependency "railties", ">= 4.1.0", "< 6.0"
 
+  s.add_development_dependency "minitest-reporters", "~> 1.3"
   s.add_development_dependency "mocha", "1.1"
   s.add_development_dependency "pry", "~> 0.10.3"
-  s.add_development_dependency "simplecov"
+  s.add_development_dependency "simplecov", "~> 0.16"
 end
