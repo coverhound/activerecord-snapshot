@@ -1,6 +1,6 @@
 # Ruby CircleCI 2.0 configuration file
 #
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details 
+# Check https://circleci.com/docs/2.0/language-ruby/ for more details
 version: 2
 jobs:
   test:
@@ -10,17 +10,8 @@ jobs:
     working_directory: ~/activerecord-snapshot
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - gem-cache-v1-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
-            - gem-cache-v1-{{ arch }}-{{ .Branch }}
-            - gem-cache-v1
-      - run: bundle check --path vendor/bundle || bundle install --frozen --path vendor/bundle
-      - save_cache:
-          key: gem-cache-v1-{{ arch }}-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
-          paths:
-            - vendor/bundle
-      - run: bundle exec rake test
+      - run: bundle install
+      - run: bundle exec rake
       - store_test_results:
           path: test_results
 
